@@ -1,0 +1,125 @@
+stages:
+  - tests
+  - build bin
+  - version
+  - deploy
+
+
+variables:
+  #vars for 'tests', 'build_bin'
+  GOOS: "linux"
+  GOARCH: "amd64"
+  GOPATH: "${CI_PROJECT_DIR}/vendor:${CI_PROJECT_DIR}"
+  GOBIN: "${CI_PROJECT_DIR}/bin"
+  GOIMAGE: "golang:1.8-alpine"
+  CGO_ENABLED: "0"
+
+# Templates
+
+.dev_filter: &dev_filter
+  only:
+    - branches
+  except:
+    - tags
+    - master
+
+.master_filter: &master_filter
+  only:
+    - master
+  except:
+    - tags
+
+.tag_filter: &tag_filter
+  only:
+    - tags
+  except:
+    - branches
+
+.shell_tags: &shell_tags
+  tags:
+    - linux
+    - shell
+
+.docker_tags: &docker_tags
+  tags:
+    - linux
+    - docker
+
+.create version: &create_version
+  <<: *master_filter
+  <<: *shell_tags
+  stage: version
+  script:
+    - curl -s -X POST "http://version.services.local/push/?project=${CI_PROJECT_ID}&ref=${CI_BUILD_REF}&action=${ACTION}"
+  when: manual
+
+.cache: &cache
+  cache:
+    key: ${CI_BUILD_REF}
+    untracked: true
+    paths:
+      - vendor/*
+      - pkg/*
+
+.artifact: &artifact
+  artifacts:
+    paths:
+      - bin
+    expire_in: 1 hour
+
+.packer_tags: &packer_tags
+  tags:
+    - linux
+    - packer
+    - local
+
+
+# Jobs
+
+tests:
+  <<: *docker_tags
+  <<: *cache
+  stage: tests
+  image: ${GOIMAGE}
+  script:
+    - apk add --no-cache --update git
+    - go get -v -t -d ./src/...
+    - go test -v -cover ./src/...
+
+build bin:
+  <<: *master_filter
+  <<: *docker_tags
+  <<: *artifact
+  <<: *cache
+  stage: build bin
+  image: ${GOIMAGE}
+  script:
+    - apk add --no-cache --update git gcc linux-headers
+    - go get -v -t -d ./src/...
+    - go build -v -i -x --ldflags '-extldflags "-static"' -o bin/${CI_PROJECT_NAME} src/main.go
+  when: always
+
+
+deploy to artifactory:
+  <<: *master_filter
+  <<: *packer_tags
+  stage: deploy
+  script:
+    - echo "deploy to artifactory"
+  when: always
+
+version patch:
+  <<: *create_version
+  variables:
+    ACTION: patch
+
+version minor:
+  <<: *create_version
+  variables:
+    ACTION: minor
+
+version major:
+  <<: *create_version
+  variables:
+    ACTION: major
+
