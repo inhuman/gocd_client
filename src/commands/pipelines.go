@@ -3,8 +3,9 @@ package commands
 import (
 	"gopkg.in/urfave/cli.v1"
 	"fmt"
-	"gocd"
+
 	"utils"
+	"gocd"
 )
 
 func pipelinesCommand() cli.Command {
@@ -21,9 +22,65 @@ func pipelinesSubCommands() []cli.Command {
 
 	commands := []cli.Command{
 		{
-			Name:   "add",
-			Usage:  "add a new pipeline",
+			Name:   "create",
+			Usage:  "create a new pipeline",
 			Action: pipelineSubCommandAdd,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:        "file",
+					Usage:       "Path to json file with data for create pipeline",
+					EnvVar:      "",
+					Hidden:      false,
+					Value:       "",
+					Destination: nil,
+				},
+				cli.StringFlag{
+					Name:        "template",
+					Usage:       "Template name, uses with other required params",
+					EnvVar:      "",
+					Hidden:      false,
+					Value:       "",
+					Destination: nil,
+				},
+				cli.StringFlag{
+					Name:        "name",
+					Usage:       "Pipeline name, required, uses with --template",
+					EnvVar:      "",
+					Hidden:      false,
+					Value:       "",
+					Destination: nil,
+				},
+				cli.StringFlag{
+					Name:        "group",
+					Usage:       "Group name, required, uses with --template",
+					EnvVar:      "",
+					Hidden:      false,
+					Value:       "",
+					Destination: nil,
+				},
+				cli.StringFlag{
+					Name:        "label",
+					Usage:       "Instance label, required, uses with --template",
+					EnvVar:      "",
+					Hidden:      false,
+					Value:       "",
+					Destination: nil,
+				},
+				cli.StringFlag{
+					Name:        "lock-behavior",
+					Usage:       "Lock behavior, uses with --template. Default 'unlockWhenFinished'",
+					EnvVar:      "",
+					Hidden:      false,
+					Value:       "unlockWhenFinished",
+					Destination: nil,
+				},
+				cli.StringSliceFlag{
+					Name:        "material",
+					Usage:       "Material, required, uses with --template.",
+					EnvVar:      "",
+					Hidden:      false,
+				},
+			},
 		},
 		{
 			Name:   "delete",
@@ -40,12 +97,13 @@ func pipelinesSubCommands() []cli.Command {
 			Usage: "shows status of pipeline",
 			Flags: []cli.Flag{
 				cli.StringFlag{
-					"name",
-					"required flag, sets name of pipeline",
-					"",
-					false,
-					"",
-					nil},
+					Name:        "name",
+					Usage:       "Required flag, pipeline name",
+					EnvVar:      "",
+					Hidden:      false,
+					Value:       "",
+					Destination: nil,
+				},
 			},
 			Action: pipelineSubCommandStatus,
 		},
@@ -55,7 +113,28 @@ func pipelinesSubCommands() []cli.Command {
 }
 
 func pipelineSubCommandAdd(c *cli.Context) error {
-	fmt.Println("new pipeline:", c.Args().First())
+
+	filePath := c.String("file")
+
+	if filePath != "" {
+		err := gocd.CreatePipelineFromFile(filePath)
+		if err != nil {
+			return err
+		}
+	}
+
+	template := c.String("template")
+
+	if template != "" {
+
+		utils.DebugMessage("Template flag found")
+
+		err := gocd.CreatePipelineFromTemplate(c)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -94,6 +173,5 @@ func pipelineSubCommandStatus(c *cli.Context) error {
 	return nil
 }
 
-//TODO: think about pretty format for pipeline groups
 //TODO: implement create/delete group
 //TODO: implement create/delete pipeline
