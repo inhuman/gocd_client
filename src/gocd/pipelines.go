@@ -42,6 +42,8 @@ func CreatePipelineFromFile(filePath string) error {
 		return err
 	}
 
+	fmt.Println(err)
+
 	utils.PrettyPrintStruct(resp)
 
 	return nil
@@ -80,7 +82,7 @@ func CreatePipelineFromTemplate(c *cli.Context) error {
 		materialAggregator = append(materialAggregator, *material)
 	}
 
-	if len(multiError.Errors) > 0 {
+	if multiError != nil {
 		return multiError.ErrorOrNil()
 	}
 
@@ -146,7 +148,6 @@ func checkStringSliceParam(name string, value []string, error error) {
 				fmt.Sprintf("Required parameter '%s' not set", name)))
 	}
 
-
 	for _, valueItem := range value {
 		if valueItem == "" {
 			utils.DebugMessage("Value is not set")
@@ -156,6 +157,3 @@ func checkStringSliceParam(name string, value []string, error error) {
 		}
 	}
 }
-
-//TODO: make this work with materials
-// ./bin/gocd-client pipelines create --template test_template --name FromTemplate --group first --label 123 --material tests/fixtures/material1.json --material tests/fixtures/material2.json

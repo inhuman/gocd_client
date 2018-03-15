@@ -2,7 +2,7 @@
   "type": "git",
   "attributes": {
     "url": "git@github.com:sample_repo2/repo.git",
-    "destination": "dest",
+    "destination": "dest2",
     "filter": null,
     "invert_filter": false,
     "name": null,
