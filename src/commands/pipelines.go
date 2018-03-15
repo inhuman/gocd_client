@@ -2,8 +2,6 @@ package commands
 
 import (
 	"gopkg.in/urfave/cli.v1"
-	"fmt"
-
 	"utils"
 	"gocd"
 )
@@ -75,10 +73,10 @@ func pipelinesSubCommands() []cli.Command {
 					Destination: nil,
 				},
 				cli.StringSliceFlag{
-					Name:        "material",
-					Usage:       "Material, required, uses with --template.",
-					EnvVar:      "",
-					Hidden:      false,
+					Name:   "material",
+					Usage:  "Material, required, uses with --template.",
+					EnvVar: "",
+					Hidden: false,
 				},
 			},
 		},
@@ -86,6 +84,12 @@ func pipelinesSubCommands() []cli.Command {
 			Name:   "delete",
 			Usage:  "delete an existing pipeline",
 			Action: pipelineSubCommandDelete,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "name",
+					Usage: "Pipeline name, required",
+				},
+			},
 		},
 		{
 			Name:   "groups",
@@ -114,6 +118,8 @@ func pipelinesSubCommands() []cli.Command {
 
 func pipelineSubCommandAdd(c *cli.Context) error {
 
+	//TODO: add env vars, array, like materials
+
 	filePath := c.String("file")
 
 	if filePath != "" {
@@ -139,7 +145,16 @@ func pipelineSubCommandAdd(c *cli.Context) error {
 }
 
 func pipelineSubCommandDelete(c *cli.Context) error {
-	fmt.Println("deleteting pipeline:", c.Args().First())
+
+	name := c.String("name")
+
+	if name != "" {
+		err := gocd.DeletePipeline(name)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -172,6 +187,3 @@ func pipelineSubCommandStatus(c *cli.Context) error {
 
 	return nil
 }
-
-//TODO: implement create/delete group
-//TODO: implement create/delete pipeline

@@ -95,6 +95,10 @@ func CreatePipelineFromTemplate(c *cli.Context) error {
 	createPipelineData.Pipeline.LockBehavior = lockBehavior
 	createPipelineData.Pipeline.Materials = materialAggregator
 
+	if os.Getenv("GOCD_CLIENT_DEBUG") == "1" {
+		utils.PrettyPrintStruct(createPipelineData)
+	}
+
 	resp, err := Client.CreatePipeline(createPipelineData)
 	if err != nil {
 		return err
@@ -102,9 +106,13 @@ func CreatePipelineFromTemplate(c *cli.Context) error {
 	if os.Getenv("GOCD_CLIENT_DEBUG") == "1" {
 		utils.PrettyPrintStruct(resp)
 	}
-	fmt.Println("Pipeline " + name + " created.")
 
+	fmt.Println("Pipeline " + name + " created.")
 	return nil
+}
+
+func DeletePipeline(name string) error {
+	return Client.DeletePipeline(name)
 }
 
 func getMaterialFromFile(filePath string) (*gocd.Material, error) {
