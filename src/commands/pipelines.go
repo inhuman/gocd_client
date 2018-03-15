@@ -25,58 +25,41 @@ func pipelinesSubCommands() []cli.Command {
 			Action: pipelineSubCommandAdd,
 			Flags: []cli.Flag{
 				cli.StringFlag{
-					Name:        "file",
-					Usage:       "Path to json file with data for create pipeline",
-					EnvVar:      "",
-					Hidden:      false,
-					Value:       "",
-					Destination: nil,
+					Name:  "file",
+					Usage: "Path to json file with data for create pipeline",
 				},
 				cli.StringFlag{
-					Name:        "template",
-					Usage:       "Template name, uses with other required params",
-					EnvVar:      "",
-					Hidden:      false,
-					Value:       "",
-					Destination: nil,
+					Name:  "template",
+					Usage: "Template name, uses with other required params",
 				},
 				cli.StringFlag{
-					Name:        "name",
-					Usage:       "Pipeline name, required, uses with --template",
-					EnvVar:      "",
-					Hidden:      false,
-					Value:       "",
-					Destination: nil,
+					Name:  "name",
+					Usage: "Pipeline name, required, uses with --template",
 				},
 				cli.StringFlag{
-					Name:        "group",
-					Usage:       "Group name, required, uses with --template",
-					EnvVar:      "",
-					Hidden:      false,
-					Value:       "",
-					Destination: nil,
+					Name:  "group",
+					Usage: "Group name, required, uses with --template",
 				},
 				cli.StringFlag{
-					Name:        "label",
-					Usage:       "Instance label, required, uses with --template",
-					EnvVar:      "",
-					Hidden:      false,
-					Value:       "",
-					Destination: nil,
+					Name:  "label",
+					Usage: "Instance label, required, uses with --template",
 				},
 				cli.StringFlag{
-					Name:        "lock-behavior",
-					Usage:       "Lock behavior, uses with --template. Default 'unlockWhenFinished'",
-					EnvVar:      "",
-					Hidden:      false,
-					Value:       "unlockWhenFinished",
-					Destination: nil,
+					Name:  "lock-behavior",
+					Usage: "Lock behavior, uses with --template. Default 'unlockWhenFinished'",
+					Value: "unlockWhenFinished",
 				},
 				cli.StringSliceFlag{
-					Name:   "material",
-					Usage:  "Material, required, uses with --template.",
-					EnvVar: "",
-					Hidden: false,
+					Name:  "material",
+					Usage: "Material, required, uses with --template. Multi-flag",
+				},
+				cli.StringSliceFlag{
+					Name:  "var",
+					Usage: "Environment variable, uses with --template. Multi-flag. Format: --var 'USERNAME=admin'",
+				},
+				cli.StringSliceFlag{
+					Name:  "var-secure",
+					Usage: "Environment variable, uses with --template. Multi-flag. Format: --var-secure 'PASSWORD=1f3rrs9uhn63hd'",
 				},
 			},
 		},
@@ -103,10 +86,6 @@ func pipelinesSubCommands() []cli.Command {
 				cli.StringFlag{
 					Name:        "name",
 					Usage:       "Required flag, pipeline name",
-					EnvVar:      "",
-					Hidden:      false,
-					Value:       "",
-					Destination: nil,
 				},
 			},
 			Action: pipelineSubCommandStatus,
@@ -117,8 +96,6 @@ func pipelinesSubCommands() []cli.Command {
 }
 
 func pipelineSubCommandAdd(c *cli.Context) error {
-
-	//TODO: add env vars, array, like materials
 
 	filePath := c.String("file")
 
