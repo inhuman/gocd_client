@@ -99,8 +99,10 @@ func CreatePipelineFromTemplate(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-
-	utils.PrettyPrintStruct(resp)
+	if os.Getenv("GOCD_CLIENT_DEBUG") == "1" {
+		utils.PrettyPrintStruct(resp)
+	}
+	fmt.Println("Pipeline " + name + " created.")
 
 	return nil
 }
