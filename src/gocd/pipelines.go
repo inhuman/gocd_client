@@ -175,9 +175,9 @@ func hydrateSecureEnvVars(envSecureVarsSlice []string) []gocd.EnvironmentVariabl
 		for _, envVar := range envSecureVarsSlice {
 			ar := strings.Split(envVar, "=")
 			v := gocd.EnvironmentVariable{
-				Name:           ar[0],
-				EncryptedValue: ar[1],
-				Secure:         true,
+				Name:   ar[0],
+				Value:  ar[1],
+				Secure: true,
 			}
 			environmentVariables = append(environmentVariables, v)
 		}
