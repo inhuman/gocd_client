@@ -3,6 +3,25 @@
 Client for gocd 
 
 ## Usage
+#### Auth
+_Authorization params can be given by params on every client call_ 
+
+Without user credentials
+```bash 
+$ gocd-client --host example pipelines ...
+```
+With user credentials
+```bash
+$ gocd-client --host example --user admin --password hardPassword pipelines ...
+```
+
+_Authorization params can be exported as env variables_
+```bash
+$ export GOCD_HOST=http://localhost:8153
+$ export GOCD_USERNAME=admin
+$ export GOCD_PASSWORD=hardPassword
+$ gocd-client pipelines ...
+``` 
 
 #### Create pipeline
 ##### From file
@@ -16,23 +35,18 @@ When using --file parameter for create pipeline other sub-command params will be
 $ gocd-client pipelines create --template test_template --name FromTemplate3 --group first --label 'git-${COUNT}'  --material tests/fixtures/material1.json --material tests/fixtures/material2.json --var 'ADF=123' --var-secure 'PASSWORD=234'
 ```
 
-##### Pipline status
-```bash
-$ gocd-client pipelines status --name pipeline1 
-{
-  "locked": false,
-  "paused": false,
-  "pausedBy": "",
-  "pausedCause": "",
-  "schedulable": false
-}
-```
 ##### Delete pipeline
 ```bash
 $ gocd-client pipelines delete --name FromTemplate3
 ```
 
-To enable debug set env 
+#### Env vars to config params
+Enable debug set env 
 ```bash
 export GOCD_CLIENT_DEBUG=1
+```
+
+Change default rpm repo name
+```bash
+export GOCD_DEFAULT_RPM_REPOSITORY=artifactory-new-rpm
 ```

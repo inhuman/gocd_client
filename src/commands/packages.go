@@ -5,6 +5,7 @@ import (
 	"utils"
 	"gocd"
 	"fmt"
+	"config"
 )
 
 func packagesCommand() cli.Command {
@@ -30,8 +31,21 @@ func packagesSubCommands() []cli.Command {
 					Usage: "Package name, required",
 				},
 				cli.StringFlag{
-					Name:  "package-repo-id",
-					Usage: "Package repository id, where the package taken from ",
+					Name:  "repo",
+					Usage: "Package repository name, where the package taken from. Command to see list of repos search in help",
+					Value: config.Config.Repository.Rpm.Default,
+				},
+				cli.BoolFlag{
+					Name:  "disable-auto-update",
+					Usage: "Disable auto update package",
+				},
+				cli.StringFlag{
+					Name:  "id",
+					Usage: "Package id, by default uses package name",
+				},
+				cli.StringSliceFlag{
+					Name: "configuration",
+					Usage: "Configuration key value field. Format --configuration 'PACKAGE_SPEC=package_name3' ",
 				},
 			},
 		},

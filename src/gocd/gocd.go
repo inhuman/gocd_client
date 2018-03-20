@@ -6,7 +6,7 @@ import (
 
 var Client go_gocd.Client
 
-func Init(host string, username string, password string) {
+func Init(host, username, password string) error {
 	Client = go_gocd.New(host, username, password)
+	return nil
 }
-

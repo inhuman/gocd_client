@@ -42,9 +42,7 @@ func CreatePipelineFromFile(filePath string) error {
 		return err
 	}
 
-	fmt.Println(err)
-
-	utils.PrettyPrintStruct(resp)
+	fmt.Println(resp.Message)
 
 	return nil
 }
@@ -120,7 +118,7 @@ func CreatePipelineFromTemplate(c *cli.Context) error {
 		utils.PrettyPrintStruct(resp)
 	}
 
-	fmt.Println("Pipeline " + name + " created.")
+	fmt.Println(resp.Message)
 	return nil
 }
 

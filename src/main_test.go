@@ -29,3 +29,24 @@ func TestRunWithNoParams(t *testing.T) {
 	}
 
 }
+
+//TODO fix tests
+
+func TestRunNoHostname(t *testing.T) {
+
+	testcli.Run("gocd-client")
+	if !testcli.Success() {
+		t.Fatalf("Expected to succeed, but failed: %s", testcli.Error())
+	}
+
+	f, err := os.Open("../tests/responses/without_hostname")
+	if err != nil {
+		t.Fatal(err)
+	}
+	file, err := ioutil.ReadAll(f)
+
+	if !testcli.StdoutContains(string(file)) {
+		t.Fatalf("Expected %q to contain %q", testcli.Stdout(), file)
+	}
+
+}
