@@ -4,9 +4,9 @@ import (
 	"github.com/inhuman/go-gocd"
 )
 
-var Client gocd.Client
+var Client go_gocd.Client
 
 func Init(host string, username string, password string) {
-	Client = gocd.New(host, username, password)
+	Client = go_gocd.New(host, username, password)
 }
 

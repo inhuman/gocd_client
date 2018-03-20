@@ -1,23 +1,21 @@
 package gocd
 
 import (
-	"github.com/inhuman/go-gocd"
 	"os"
 	"encoding/json"
 	"utils"
+	"fmt"
+	"strings"
 	"gopkg.in/urfave/cli.v1"
 	"github.com/hashicorp/go-multierror"
-	"github.com/pkg/errors"
-	"fmt"
-	"regexp"
-	"strings"
+	"github.com/inhuman/go-gocd"
 )
 
-func GetPipelineGroups() ([]*gocd.PipelineGroup, error) {
+func GetPipelineGroups() ([]*go_gocd.PipelineGroup, error) {
 	return Client.GetPipelineGroups()
 }
 
-func GetPipelineStatus(name string) (*gocd.PipelineStatus, error) {
+func GetPipelineStatus(name string) (*go_gocd.PipelineStatus, error) {
 	return Client.GetPipelineStatus(name)
 }
 
@@ -33,7 +31,7 @@ func CreatePipelineFromFile(filePath string) error {
 	}
 	jsonParser := json.NewDecoder(file)
 
-	var createPipelineData gocd.PipelineConfig
+	var createPipelineData go_gocd.PipelineConfig
 
 	if err = jsonParser.Decode(&createPipelineData); err != nil {
 		return err
@@ -58,34 +56,34 @@ func CreatePipelineFromTemplate(c *cli.Context) error {
 	multiError := &tmp
 
 	name := c.String("name")
-	checkStringParam("name", name, multiError)
+	utils.CheckStringParam("name", name, multiError)
 
 	group := c.String("group")
-	checkStringParam("group", group, multiError)
+	utils.CheckStringParam("group", group, multiError)
 
 	label := c.String("label")
-	checkStringParam("label", label, multiError)
+	utils.CheckStringParam("label", label, multiError)
 
 	lockBehavior := c.String("lock-behavior")
-	checkStringParam("lockBehavior", lockBehavior, multiError)
+	utils.CheckStringParam("lockBehavior", lockBehavior, multiError)
 
 	template := c.String("template")
-	checkStringParam("template", template, multiError)
+	utils.CheckStringParam("template", template, multiError)
 
 	materials := c.StringSlice("material")
-	checkStringSliceParam("material", materials, multiError)
+	utils.CheckStringSliceParam("material", materials, multiError)
 
 	envVarsSlice := c.StringSlice("var")
-	checkEnvVarParam(envVarsSlice, multiError)
+	utils.CheckEnvVarParam(envVarsSlice, multiError)
 
 	envSecureVarsSlice := c.StringSlice("var-secure")
-	checkEnvVarParam(envSecureVarsSlice, multiError)
+	utils.CheckEnvVarParam(envSecureVarsSlice, multiError)
 
 	envSecureVars := hydrateSecureEnvVars(envSecureVarsSlice)
 	envVars := hydrateEnvVars(envVarsSlice)
 	allEnvVars := append(envSecureVars, envVars...)
 
-	var materialAggregator []gocd.Material
+	var materialAggregator []go_gocd.PipelineMaterial
 
 	for _, path := range materials {
 		material, err := getMaterialFromFile(path)
@@ -100,7 +98,7 @@ func CreatePipelineFromTemplate(c *cli.Context) error {
 		return multiError.ErrorOrNil()
 	}
 
-	var pipelineConfig gocd.PipelineConfig
+	var pipelineConfig go_gocd.PipelineConfig
 
 	pipelineConfig.Group = group
 	pipelineConfig.Pipeline.Name = name
@@ -126,13 +124,13 @@ func CreatePipelineFromTemplate(c *cli.Context) error {
 	return nil
 }
 
-func DeletePipeline(name string) error {
+func DeletePipeline(name string) (*go_gocd.ApiResponse, *multierror.Error) {
 	return Client.DeletePipeline(name)
 }
 
-func getMaterialFromFile(filePath string) (*gocd.Material, error) {
+func getMaterialFromFile(filePath string) (*go_gocd.PipelineMaterial, error) {
 
-	var material gocd.Material
+	var material go_gocd.PipelineMaterial
 
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return nil, err
@@ -151,13 +149,13 @@ func getMaterialFromFile(filePath string) (*gocd.Material, error) {
 	return &material, nil
 }
 
-func hydrateEnvVars(envVarsSlice []string) []gocd.EnvironmentVariable {
-	var environmentVariables []gocd.EnvironmentVariable
+func hydrateEnvVars(envVarsSlice []string) []go_gocd.EnvironmentVariable {
+	var environmentVariables []go_gocd.EnvironmentVariable
 
 	if len(envVarsSlice) > 0 {
 		for _, envVar := range envVarsSlice {
 			ar := strings.Split(envVar, "=")
-			v := gocd.EnvironmentVariable{
+			v := go_gocd.EnvironmentVariable{
 				Name:  ar[0],
 				Value: ar[1],
 			}
@@ -167,14 +165,14 @@ func hydrateEnvVars(envVarsSlice []string) []gocd.EnvironmentVariable {
 	return environmentVariables
 }
 
-func hydrateSecureEnvVars(envSecureVarsSlice []string) []gocd.EnvironmentVariable {
+func hydrateSecureEnvVars(envSecureVarsSlice []string) []go_gocd.EnvironmentVariable {
 
-	var environmentVariables []gocd.EnvironmentVariable
+	var environmentVariables []go_gocd.EnvironmentVariable
 
 	if len(envSecureVarsSlice) > 0 {
 		for _, envVar := range envSecureVarsSlice {
 			ar := strings.Split(envVar, "=")
-			v := gocd.EnvironmentVariable{
+			v := go_gocd.EnvironmentVariable{
 				Name:   ar[0],
 				Value:  ar[1],
 				Secure: true,
@@ -184,62 +182,4 @@ func hydrateSecureEnvVars(envSecureVarsSlice []string) []gocd.EnvironmentVariabl
 	}
 	return environmentVariables
 
-}
-
-//TODO: in future move checkalkas to separate local package
-func checkStringParam(name string, value string, error error) {
-
-	utils.DebugMessage("Check required value: " + name + " value is: " + value)
-
-	if value == "" {
-		utils.DebugMessage("Value is not set")
-		error = multierror.Append(
-			error, errors.New(
-				fmt.Sprintf("Required parameter '%s' not set", name)))
-	}
-}
-
-func checkStringSliceParam(name string, value []string, error error) {
-
-	utils.DebugMessage("Check required value: " + name)
-
-	if len(value) < 1 {
-		error = multierror.Append(
-			error, errors.New(
-				fmt.Sprintf("Required parameter '%s' not set", name)))
-	}
-
-	for _, valueItem := range value {
-		if valueItem == "" {
-			utils.DebugMessage("Value is not set")
-			error = multierror.Append(
-				error, errors.New(
-					fmt.Sprintf("Required parameter '%s' not set", name)))
-		}
-	}
-}
-
-func checkEnvVarParam(envVars []string, error error) {
-
-	utils.DebugMessage("Check env vars")
-
-	if len(envVars) > 0 {
-		for _, envVar := range envVars {
-			matched, err := regexp.MatchString("[A-Z\\d]+=.*", envVar)
-
-			if err != nil {
-				error = multierror.Append(error, err)
-			}
-
-			if !matched {
-				utils.DebugMessage(fmt.Sprintf("Env var '%s' mismatched format", envVar))
-
-				error = multierror.Append(
-					error, errors.New(
-						fmt.Sprintf("Env var '%s' mismatched format, see help for details", envVar)))
-			}
-		}
-	} else {
-		utils.DebugMessage("Env var is empty, skipping..")
-	}
 }

@@ -1,0 +1,17 @@
+NAME:
+   gocd client - managing pipelines, etc
+
+USAGE:
+   gocd-client [global options] command [command options] [arguments...]
+
+VERSION:
+   0.0.1
+
+COMMANDS:
+     pipelines, p   options for pipelines
+     packages, pkg  options for packages
+     help, h        Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --help, -h     show help
+   --version, -v  print the version

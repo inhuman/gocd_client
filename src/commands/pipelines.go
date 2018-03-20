@@ -4,6 +4,7 @@ import (
 	"gopkg.in/urfave/cli.v1"
 	"utils"
 	"gocd"
+	"fmt"
 )
 
 func pipelinesCommand() cli.Command {
@@ -126,10 +127,14 @@ func pipelineSubCommandDelete(c *cli.Context) error {
 	name := c.String("name")
 
 	if name != "" {
-		err := gocd.DeletePipeline(name)
+		resp, err := gocd.DeletePipeline(name)
 		if err != nil {
 			return err
 		}
+		fmt.Println(resp.Message)
+
+	} else {
+		//TODO: fire error or something
 	}
 
 	return nil

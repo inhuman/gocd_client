@@ -1,25 +1,14 @@
 package utils
 
 import (
-	"net/http"
 	"github.com/hokaccha/go-prettyjson"
-	"log"
 	"fmt"
 	"strings"
 	"regexp"
 	"os"
+	"github.com/hashicorp/go-multierror"
+	"errors"
 )
-
-func IsHeaderExists(r *http.Request, header string) bool {
-
-	for key := range r.Header {
-		if key == header {
-			return true
-		}
-	}
-
-	return false
-}
 
 func PrettyPrintStruct(strct interface{}) {
 
@@ -27,25 +16,10 @@ func PrettyPrintStruct(strct interface{}) {
 	fmt.Println(string(s))
 }
 
-func CheckError(err error) {
-	if err != nil {
-		log.Println("error:", err)
-	}
-}
-
 func DebugMessage(string string) {
 	if os.Getenv("GOCD_CLIENT_DEBUG") == "1" {
 		fmt.Println(string)
 	}
-}
-
-func InArray(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
 }
 
 func InArrayRegexp(string string, regexpArr []string) bool {
@@ -68,4 +42,61 @@ func ParseDcService(serviceName string) (string, string) {
 	stringArr2 := strings.Split(stringArr[1], "]")
 
 	return stringArr2[0], stringArr2[1]
+}
+
+func CheckStringParam(name string, value string, error *multierror.Error) {
+
+	DebugMessage("Check required value: " + name + " value is: " + value)
+
+	if value == "" {
+		DebugMessage("Value is not set")
+		error = multierror.Append(
+			error, errors.New(
+				fmt.Sprintf("Required parameter '%s' not set", name)))
+	}
+}
+
+func CheckStringSliceParam(name string, value []string, error *multierror.Error) {
+
+	DebugMessage("Check required value: " + name)
+
+	if len(value) < 1 {
+		error = multierror.Append(
+			error, errors.New(
+				fmt.Sprintf("Required parameter '%s' not set", name)))
+	}
+
+	for _, valueItem := range value {
+		if valueItem == "" {
+			DebugMessage("Value is not set")
+			error = multierror.Append(
+				error, errors.New(
+					fmt.Sprintf("Required parameter '%s' not set", name)))
+		}
+	}
+}
+
+func CheckEnvVarParam(envVars []string, error *multierror.Error) {
+
+	DebugMessage("Check env vars")
+
+	if len(envVars) > 0 {
+		for _, envVar := range envVars {
+			matched, err := regexp.MatchString("[A-Z\\d]+=.*", envVar)
+
+			if err != nil {
+				error = multierror.Append(error, err)
+			}
+
+			if !matched {
+				DebugMessage(fmt.Sprintf("Env var '%s' mismatched format", envVar))
+
+				error = multierror.Append(
+					error, errors.New(
+						fmt.Sprintf("Env var '%s' mismatched format, see help for details", envVar)))
+			}
+		}
+	} else {
+		DebugMessage("Env var is empty, skipping..")
+	}
 }
