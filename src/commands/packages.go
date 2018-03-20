@@ -4,6 +4,7 @@ import (
 	"gopkg.in/urfave/cli.v1"
 	"utils"
 	"gocd"
+	"fmt"
 )
 
 func packagesCommand() cli.Command {
@@ -25,8 +26,12 @@ func packagesSubCommands() []cli.Command {
 			Action: packageSubCommandAdd,
 			Flags: []cli.Flag{
 				cli.StringFlag{
-					Name:  "file",
-					Usage: "Path to json file with data for create pipeline",
+					Name:  "name",
+					Usage: "Package name, required",
+				},
+				cli.StringFlag{
+					Name:  "package-repo-id",
+					Usage: "Package repository id, where the package taken from ",
 				},
 			},
 		},
@@ -85,10 +90,11 @@ func packageSubCommandDelete(c *cli.Context) error {
 	name := c.String("name")
 
 	if name != "" {
-		_, err := gocd.DeletePackage(name)
+		resp, err := gocd.DeletePackage(name)
 		if err != nil {
 			return err
 		}
+		fmt.Println(resp.Message)
 	}
 
 	return nil

@@ -84,6 +84,8 @@ tests:
   script:
     - apk add --no-cache --update git
     - go get -v -t -d ./src/...
+    - go build -v -i -x --ldflags '-extldflags "-static"' -o bin/${CI_PROJECT_NAME} src/main.go
+    - export PATH=$PATH:$GOPATH/bin
     - go test -v -cover ./src/...
 
 build bin:
