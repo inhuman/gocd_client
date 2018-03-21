@@ -122,7 +122,7 @@ func CreatePipelineFromTemplate(c *cli.Context) error {
 		utils.PrettyPrintStruct(resp)
 	}
 
-	fmt.Println(resp.Message)
+	fmt.Println("Pipeline " + name + " created.")
 	return nil
 }
 

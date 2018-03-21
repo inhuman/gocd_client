@@ -13,13 +13,13 @@ func main() {
 
 	err := app.Init(cliApp)
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "ERROR: %v\n", err)
+		fmt.Fprintf(os.Stdout, "INIT ERROR: %v\n", err)
 		os.Exit(1)
 	}
 
 	err = cliApp.Run(os.Args)
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "ERROR: %v\n", err)
+		fmt.Fprintf(os.Stdout, "RUNTIME ERROR: %v\n", err)
 		os.Exit(1)
 	}
 }

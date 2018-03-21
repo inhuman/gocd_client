@@ -7,9 +7,10 @@ import (
 	"io/ioutil"
 )
 
-// before test
-// build app
-// export PATH
+// before test:
+// go build -v -i -x --ldflags '-extldflags "-static"' -o bin/gocd-client src/main.go
+// export PATH=$PATH:$GOPATH/bin
+// go test -v -cover ./src/...
 
 func TestRunWithNoParams(t *testing.T) {
 
@@ -27,7 +28,6 @@ func TestRunWithNoParams(t *testing.T) {
 	if !testcli.StdoutContains(string(file)) {
 		t.Fatalf("Expected %q to contain %q", testcli.Stdout(), file)
 	}
-
 }
 
 func TestRunNoHostname(t *testing.T) {

@@ -14,7 +14,7 @@ var host, username, password string
 func Init() {
 
 	if len(host) < 1 {
-		fmt.Fprintf(os.Stdout, "ERROR: %v\n", errors.New("gocd server hostname not set, see help for details"))
+		fmt.Fprintf(os.Stdout, "GOCD client error: %v\n", errors.New("gocd server hostname not set, see help for details"))
 		os.Exit(1)
 	}
 

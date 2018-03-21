@@ -6,6 +6,10 @@ import (
 	"gocd"
 	"fmt"
 	"config"
+	"github.com/inhuman/go-gocd"
+	"github.com/hashicorp/go-multierror"
+	"strings"
+	"os"
 )
 
 func packagesCommand() cli.Command {
@@ -43,9 +47,13 @@ func packagesSubCommands() []cli.Command {
 					Name:  "id",
 					Usage: "Package id, by default uses package name",
 				},
+				cli.StringFlag{
+					Name:  "spec",
+					Usage: "Package spec, e.g configuration PACKAGE_SPEC, required",
+				},
 				cli.StringSliceFlag{
-					Name: "configuration",
-					Usage: "Configuration key value field. Format --configuration 'PACKAGE_SPEC=package_name3' ",
+					Name:  "configuration",
+					Usage: "Configuration key value field. Format --configuration 'PACKAGE_SPEC=package-2.8-1.fc20.src'",
 				},
 			},
 		},
@@ -67,36 +75,76 @@ func packagesSubCommands() []cli.Command {
 
 func packageSubCommandAdd(c *cli.Context) error {
 
-	// flags to create package
-	// id []
-	// name [req]
-	// auto-update [] default true
-	// package-repo-id [req]
-	// configuration [multi]
 
+	var tmp multierror.Error
+	multiError := &tmp
 
-	filePath := c.String("file")
+	name := c.String("name")
+	utils.CheckStringParam("name", name, multiError)
 
-	if filePath != "" {
-		err := gocd.CreatePipelineFromFile(filePath)
-		if err != nil {
-			return err
-		}
+	// If package id not set, use name
+	id := c.String("id")
+	if id == "" {
+		id = name
 	}
 
-	template := c.String("template")
-
-	if template != "" {
-
-		utils.DebugMessage("Template flag found")
-
-		err := gocd.CreatePipelineFromTemplate(c)
-		if err != nil {
-			return err
-		}
+	repoName := c.String("repo")
+	if repoName == "" {
+		repoName = config.Config.Repository.Rpm.Default
 	}
+	repo, err := gocd.GetPackageRepoByName(repoName)
+	if err != nil {
+		return err
+	}
+
+	spec := c.String("spec")
+	utils.CheckStringParam("spec", spec, multiError)
+
+	if multiError.Errors != nil {
+		return multiError.ErrorOrNil()
+	}
+
+	configurationSlice := c.StringSlice("configuration")
+
+	pkg := go_gocd.Package{}
+	pkg.Name = name
+	pkg.Id = name
+	pkg.AutoUpdate = !c.Bool("disable-auto-update")
+	pkg.Configuration = hydrateConfigurationVars(configurationSlice)
+	pkg.Configuration = addPackageSpec(spec, pkg.Configuration)
+	pkg.PackageRepo.Id = repo.RepoId
+
+	if os.Getenv("GOCD_CLIENT_DEBUG") == "1" {
+		fmt.Println("Prepared package")
+		utils.PrettyPrintStruct(pkg)
+	}
+
+	_, resp, err := gocd.CreatePackage(pkg)
+	if err != nil {
+		multiError = multierror.Append(multiError, err)
+	}
+
+	if multiError.Errors != nil {
+		return multiError.ErrorOrNil()
+	}
+
+	if os.Getenv("GOCD_CLIENT_DEBUG") == "1" {
+		utils.PrettyPrintStruct(resp)
+	}
+
+	fmt.Println("Package " + name + " created.")
 
 	return nil
+}
+
+func addPackageSpec(spec string, configuration []go_gocd.Configuration) []go_gocd.Configuration {
+
+	specStr := go_gocd.Configuration{
+		Key: "PACKAGE_SPEC",
+		Value: spec,
+	}
+
+	return append(configuration, specStr)
 }
 
 func packageSubCommandDelete(c *cli.Context) error {
@@ -112,4 +160,22 @@ func packageSubCommandDelete(c *cli.Context) error {
 	}
 
 	return nil
+}
+
+func hydrateConfigurationVars(varsSlice []string) []go_gocd.Configuration {
+	var configuration []go_gocd.Configuration
+
+	if len(varsSlice) > 0 {
+		for _, envVar := range varsSlice {
+
+			ar := strings.Split(envVar, "=")
+
+			v := go_gocd.Configuration{}
+			v.Key = ar[0]
+			v.Value = ar[1]
+
+			configuration = append(configuration, v)
+		}
+	}
+	return configuration
 }
