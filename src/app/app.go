@@ -5,7 +5,6 @@ import (
 	"commands"
 	"gocd"
 	"config"
-	"errors"
 )
 
 //http://localhost:8153
@@ -42,30 +41,16 @@ func Init(cliApp *cli.App) error {
 }
 
 func beforeRun(c *cli.Context) error {
-	err := gocdClientInit(c)
-	if err != nil {
-		return err
-	}
 
-	err = config.Init()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func gocdClientInit(c *cli.Context) error {
 	host := c.String("host")
-
-	if len(host) < 1 {
-		return errors.New("hostname can not be empty")
-	}
-
 	username := c.String("username")
 	password := c.String("password")
+	gocd.SetClientConfig(host, username, password)
 
-	gocd.Init(host, username, password)
+	err := config.Init()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

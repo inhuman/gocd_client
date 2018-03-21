@@ -6,5 +6,6 @@ import (
 )
 
 func DeletePackage(id string) (*go_gocd.ApiResponse, *multierror.Error) {
+	Init()
 	return Client.DeletePackage(id)
 }

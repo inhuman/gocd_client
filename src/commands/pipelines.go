@@ -134,7 +134,7 @@ func pipelineSubCommandDelete(c *cli.Context) error {
 		fmt.Println(resp.Message)
 
 	} else {
-		//TODO: fire error or something
+		//TODO: fi
 	}
 
 	return nil

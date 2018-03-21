@@ -12,14 +12,17 @@ import (
 )
 
 func GetPipelineGroups() ([]*go_gocd.PipelineGroup, error) {
+	Init()
 	return Client.GetPipelineGroups()
 }
 
 func GetPipelineStatus(name string) (*go_gocd.PipelineStatus, error) {
+	Init()
 	return Client.GetPipelineStatus(name)
 }
 
 func CreatePipelineFromFile(filePath string) error {
+	Init()
 
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return err
@@ -48,6 +51,7 @@ func CreatePipelineFromFile(filePath string) error {
 }
 
 func CreatePipelineFromTemplate(c *cli.Context) error {
+	Init()
 
 	//TODO: fix this to norm
 	var tmp multierror.Error
@@ -123,6 +127,7 @@ func CreatePipelineFromTemplate(c *cli.Context) error {
 }
 
 func DeletePipeline(name string) (*go_gocd.ApiResponse, *multierror.Error) {
+	Init()
 	return Client.DeletePipeline(name)
 }
 

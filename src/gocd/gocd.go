@@ -2,11 +2,27 @@ package gocd
 
 import (
 	"github.com/inhuman/go-gocd"
+	"fmt"
+	"os"
+	"errors"
 )
 
 var Client go_gocd.Client
 
-func Init(host, username, password string) error {
+var host, username, password string
+
+func Init() {
+
+	if len(host) < 1 {
+		fmt.Fprintf(os.Stdout, "ERROR: %v\n", errors.New("gocd server hostname not set, see help for details"))
+		os.Exit(1)
+	}
+
 	Client = go_gocd.New(host, username, password)
-	return nil
+}
+
+func SetClientConfig(Host, Username, Password string) {
+	host = Host
+	username = Username
+	password = Password
 }

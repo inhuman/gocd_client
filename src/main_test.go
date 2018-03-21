@@ -30,13 +30,11 @@ func TestRunWithNoParams(t *testing.T) {
 
 }
 
-//TODO fix tests
-
 func TestRunNoHostname(t *testing.T) {
 
-	testcli.Run("gocd-client")
-	if !testcli.Success() {
-		t.Fatalf("Expected to succeed, but failed: %s", testcli.Error())
+	testcli.Run("gocd-client", "pipelines", "status", "--name", "test")
+	if !testcli.Failure() {
+		t.Fatalf("Expected to failure, but succeed: %s", testcli.Error())
 	}
 
 	f, err := os.Open("../tests/responses/without_hostname")

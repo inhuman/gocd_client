@@ -1,5 +1,5 @@
 NAME:
-   gocd client - managing pipelines, etc
+   gocd client - managing pipelines, creating packages,  etc
 
 USAGE:
    gocd-client [global options] command [command options] [arguments...]
@@ -13,5 +13,8 @@ COMMANDS:
      help, h        Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --help, -h     show help
-   --version, -v  print the version
+   --host value      Gocd server url [$GOCD_HOST]
+   --user value      Gocd user name [$GOCD_USERNAME]
+   --password value  Gocd password [$GOCD_PASSWORD]
+   --help, -h        show help
+   --version, -v     print the version
