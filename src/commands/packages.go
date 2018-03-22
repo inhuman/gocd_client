@@ -28,6 +28,7 @@ func packagesSubCommands() []cli.Command {
 		{
 			Name:   "create",
 			Usage:  "create a new package",
+			Aliases: []string{"c"},
 			Action: packageSubCommandAdd,
 			Flags: []cli.Flag{
 				cli.StringFlag{
@@ -60,6 +61,7 @@ func packagesSubCommands() []cli.Command {
 		{
 			Name:   "delete",
 			Usage:  "delete an existing package",
+			Aliases: []string{"d"},
 			Action: packageSubCommandDelete,
 			Flags: []cli.Flag{
 				cli.StringFlag{
