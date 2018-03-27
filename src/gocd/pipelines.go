@@ -131,6 +131,7 @@ func DeletePipeline(name string) (*go_gocd.ApiResponse, *multierror.Error) {
 	return Client.DeletePipeline(name)
 }
 
+
 func getMaterialFromFile(filePath string) (*go_gocd.PipelineMaterial, error) {
 
 	var material go_gocd.PipelineMaterial
