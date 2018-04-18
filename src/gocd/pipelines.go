@@ -131,6 +131,15 @@ func DeletePipeline(name string) (*go_gocd.ApiResponse, *multierror.Error) {
 	return Client.DeletePipeline(name)
 }
 
+func PausePipeline(name, cause string) (*go_gocd.ApiResponse, *multierror.Error) {
+	Init()
+	return Client.PausePipeline(name, cause)
+}
+
+func UnpausePipeline(name, cause string) (*go_gocd.ApiResponse, *multierror.Error) {
+	Init()
+	return Client.UnpausePipeline(name)
+}
 
 func getMaterialFromFile(filePath string) (*go_gocd.PipelineMaterial, error) {
 

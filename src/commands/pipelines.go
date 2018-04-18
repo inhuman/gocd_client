@@ -91,6 +91,32 @@ func pipelinesSubCommands() []cli.Command {
 			},
 			Action: pipelineSubCommandStatus,
 		},
+		{
+			Name:  "pause",
+			Usage: "pause the pipeline",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:        "name",
+					Usage:       "Required flag, pipeline name",
+				},
+				cli.StringFlag{
+					Name:        "cause",
+					Usage:       "Reason for pausing the pipeline",
+				},
+			},
+			Action: pipelineSubCommandPause,
+		},
+		{
+			Name:  "unpause",
+			Usage: "unpause the pipeline",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:        "name",
+					Usage:       "Required flag, pipeline name",
+				},
+			},
+			Action: pipelineSubCommandUnpause,
+		},
 	}
 
 	return commands
@@ -165,6 +191,45 @@ func pipelineSubCommandStatus(c *cli.Context) error {
 		}
 
 		utils.PrettyPrintStruct(status)
+	}
+
+	return nil
+}
+
+func pipelineSubCommandPause(c *cli.Context) error {
+
+	name := c.String("name")
+	cause := c.String("cause")
+	if name != "" {
+		resp, err := gocd.PausePipeline(name, cause)
+
+		if err != nil {
+			return err
+		}
+
+		utils.PrettyPrintStruct(resp.Message)
+	}
+
+	return nil
+}
+
+func pipelineSubCommandUnpause(c *cli.Context) error {
+
+	name := c.String("name")
+	cause := c.String("cause")
+
+	if cause == "" {
+		cause = "Default cause"
+	}
+
+	if name != "" {
+		resp, err := gocd.UnpausePipeline(name, cause)
+
+		if err != nil {
+			return err
+		}
+
+		utils.PrettyPrintStruct(resp.Message)
 	}
 
 	return nil

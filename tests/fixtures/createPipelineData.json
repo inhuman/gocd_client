@@ -2,7 +2,7 @@
   "pipeline": {
     "label_template": "${COUNT}",
     "lock_behavior": "lockOnFailure",
-    "name": "new_pipeline7",
+    "name": "new_pipeline_1",
     "template": null,
     "materials": [
       {
@@ -38,7 +38,7 @@
           {
             "name": "defaultJob",
             "run_instance_count": null,
-            "timeout": "never",
+            "timeout": 0,
             "environment_variables": [],
             "resources": [],
             "tasks": [
